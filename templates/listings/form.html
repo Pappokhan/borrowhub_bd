@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block title %}{% if mode == 'create' %}List an item{% else %}Edit listing{% endif %} · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:860px">
+  <h1 class="h2 mb-1">{% if mode == 'create' %}List an item for rent{% else %}Edit “{{ listing.title }}”{% endif %}</h1>
+  <p class="text-soft">Clear photos and an honest description get more bookings.</p>
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    {% include "partials/_form_errors.html" %}
+    <div class="panel mb-3"><h2>The item</h2>
+      <div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=form.category %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.condition %}</div>
+        <div class="col-md-8">{% include "partials/_field.html" with field=form.title %}</div><div class="col-md-4">{% include "partials/_field.html" with field=form.brand %}</div>
+        <div class="col-12">{% include "partials/_field.html" with field=form.description %}{% include "partials/_field.html" with field=form.rules %}</div></div></div>
+    <div class="panel mb-3"><h2>Photos</h2>
+      {% if images %}<div class="d-flex flex-wrap gap-3 mb-3">{% for im in images %}<div class="text-center"><img src="{{ im.image.url }}" style="width:110px;height:84px;object-fit:cover;border-radius:8px" alt=""><button class="btn btn-sm btn-ghost mt-1" formaction="{% url 'listings:image_delete' im.pk %}" formmethod="post" formnovalidate>Remove</button></div>{% endfor %}</div>{% endif %}
+      {% include "partials/_field.html" with field=form.images %}</div>
+    <div class="panel mb-3"><h2>Price & rental length</h2>
+      <div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=form.price_per_day %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.security_deposit %}</div>
+        <div class="col-md-6">{% include "partials/_field.html" with field=form.min_days %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.max_days %}</div></div>
+      <div class="small text-soft">BorrowHub keeps a {{ SITE.commission_percent|floatformat:"-1" }}% commission on the rental amount. The deposit is never counted as income unless you claim damage.</div></div>
+    <div class="panel mb-4"><h2>Location & handover</h2>
+      <div class="row"><div class="col-md-6">{% include "partials/_field.html" with field=form.city %}</div><div class="col-md-6">{% include "partials/_field.html" with field=form.area %}</div>
+        <div class="col-md-4">{% include "partials/_field.html" with field=form.pickup_available %}</div><div class="col-md-4">{% include "partials/_field.html" with field=form.delivery_available %}</div><div class="col-md-4">{% include "partials/_field.html" with field=form.delivery_fee %}</div></div></div>
+    <button class="btn btn-pine btn-lg">{% if mode == 'create' %}Publish listing{% else %}Save changes{% endif %}</button>
+    <a class="btn btn-ghost btn-lg" href="{% url 'listings:mine' %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

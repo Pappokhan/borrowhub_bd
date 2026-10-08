@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Receipt {{ booking.code }}</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#10221c;max-width:720px;margin:2rem auto;padding:0 1rem}
+  h1{margin:0}.row{display:flex;justify-content:space-between;padding:.45rem 0;border-bottom:1px solid #e3ebe7}
+  .tot{font-weight:800;font-size:1.15rem;border-bottom:0;border-top:2px solid #10221c;margin-top:.5rem}
+  .muted{color:#5b6b64;font-size:.9rem}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0}
+  button{padding:.5rem 1rem;border-radius:8px;border:1px solid #0b6b4c;background:#0b6b4c;color:#fff;cursor:pointer}
+  @media print{button{display:none}}
+</style></head><body>
+<div style="display:flex;justify-content:space-between;align-items:center"><div><h1>{{ SITE.site_name }}</h1><div class="muted">Rental receipt</div></div><button onclick="window.print()">Print / Save PDF</button></div>
+<div class="grid"><div><div class="muted">Booking</div><b>{{ booking.code }}</b><div class="muted">{{ booking.created_at|date:"d M Y" }} · {{ booking.get_status_display }}</div></div>
+<div><div class="muted">Item</div><b>{{ booking.listing.title }}</b><div class="muted">{{ booking.start_date|date:"d M" }} – {{ booking.end_date|date:"d M Y" }} ({{ booking.days }} days)</div></div>
+<div><div class="muted">Renter</div>{{ booking.renter.display_name }}<div class="muted">{{ booking.renter.phone }}</div></div>
+<div><div class="muted">Owner</div>{{ booking.owner.display_name }}<div class="muted">{{ booking.owner.phone }}</div></div></div>
+<div class="row"><span>Rental ({{ booking.days }} × ৳{{ booking.daily_rate|floatformat:"0g" }})</span><span>৳{{ booking.rental_amount|floatformat:"2g" }}</span></div>
+{% if booking.delivery_fee %}<div class="row"><span>Delivery fee</span><span>৳{{ booking.delivery_fee|floatformat:"2g" }}</span></div>{% endif %}
+<div class="row"><span>Refundable security deposit</span><span>৳{{ booking.security_deposit|floatformat:"2g" }}</span></div>
+<div class="row tot"><span>Total</span><span>৳{{ booking.total_payable|floatformat:"2g" }}</span></div>
+{% if booking.deposit_deduction %}<div class="row"><span>Deposit deduction (damage)</span><span>− ৳{{ booking.deposit_deduction|floatformat:"2g" }}</span></div>{% endif %}
+<p class="muted" style="margin-top:2rem">Deposit status: {{ booking.get_deposit_status_display }}. This is a computer-generated receipt. Questions? {{ SITE.support_email }} · {{ SITE.support_phone }}</p>
+</body></html>

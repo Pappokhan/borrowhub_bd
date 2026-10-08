@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block title %}How it works · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <h1 class="mb-2">How BorrowHub BD works</h1>
+  <p class="text-soft maxw-60 mb-5">BorrowHub sits between the owner and the renter. We run booking, payment, the security deposit and the return check, so neither side has to trust a stranger.</p>
+  <div class="row g-4">
+    <div class="col-lg-6"><div class="panel h-100"><h2>If you're renting</h2>
+      <ol class="step-list mt-3">
+        <li><b>Search and pick dates.</b> Filter by city, price, delivery and availability.</li>
+        <li><b>Send a request.</b> The price breakdown shows rent, delivery fee and the refundable deposit.</li>
+        <li><b>Pay after the owner accepts.</b> Send money to BorrowHub's bKash, Nagad or Rocket number and enter your TrxID. You have {{ SITE.payment_window_hours }} hours.</li>
+        <li><b>Collect the item.</b> Pick it up or get it delivered. The owner marks the handover.</li>
+        <li><b>Return it.</b> After inspection you get your deposit back. If the owner reports damage, you can accept or dispute it.</li>
+      </ol></div></div>
+    <div class="col-lg-6"><div class="panel h-100"><h2>If you're an owner</h2>
+      <ol class="step-list mt-3">
+        <li><b>List your item.</b> Add photos, a daily price, a deposit and your rules.</li>
+        <li><b>Review requests.</b> Accept the ones that suit you. Dates are blocked automatically.</li>
+        <li><b>Hand over once it's paid.</b> You only hand over after BorrowHub confirms the payment.</li>
+        <li><b>Inspect on return.</b> Report damage within the inspection window, or release the deposit.</li>
+        <li><b>Get paid.</b> Your earnings, minus the {{ SITE.commission_percent|floatformat:"-1" }}% commission, go to your payout account.</li>
+      </ol></div></div>
+  </div>
+  <h2 class="mt-5 mb-3">Common questions</h2>
+  <div class="accordion" id="faq">
+    <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f1">What is the security deposit?</button></h3><div id="f1" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">A refundable amount set by the owner. We hold it during the rental and return it after the item is checked. If there's damage, the owner can claim part or all of it.</div></div></div>
+    <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f2">How much does BorrowHub charge?</button></h3><div id="f2" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">Renters pay the listed price with no extra fee. Owners pay a {{ SITE.commission_percent|floatformat:"-1" }}% commission on the rental amount, taken from their earnings when the rental completes.</div></div></div>
+    <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f3">What if the item is damaged or not returned?</button></h3><div id="f3" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">Either side can open a dispute from the booking page. Our team reviews the photos and messages and decides how the deposit is split.</div></div></div>
+    <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f4">Can I cancel?</button></h3><div id="f4" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">Yes, before the item is handed over. If you've already paid, the full amount is refunded to your mobile wallet.</div></div></div>
+    <div class="accordion-item"><h3 class="accordion-header"><button class="accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#f5">What does "Verified" mean?</button></h3><div id="f5" class="accordion-collapse collapse" data-bs-parent="#faq"><div class="accordion-body">The member sent a photo of their NID and our team checked it. We recommend renting from verified owners and verifying your own profile.</div></div></div>
+  </div>
+</div>
+{% endblock %}

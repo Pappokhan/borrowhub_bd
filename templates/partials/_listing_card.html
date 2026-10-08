@@ -1,0 +1,15 @@
+<a href="{{ l.get_absolute_url }}" class="listing-card">
+  <div class="listing-media">
+    {% with c=l.cover %}{% if c %}<img src="{{ c.image.url }}" loading="lazy" alt="{{ l.title }}">{% else %}<div class="ph"><i class="bi {{ l.category.icon }}"></i></div>{% endif %}{% endwith %}
+    {% if l.is_featured %}<span class="feat-badge">Featured</span>{% endif %}
+    <span class="price-tag">৳{{ l.price_per_day|floatformat:"0g" }}<small>/day</small></span>
+  </div>
+  <div class="listing-body">
+    <h3>{{ l.title }}</h3>
+    <div class="meta"><i class="bi bi-geo-alt"></i> {{ l.area }}, {{ l.city }}</div>
+    <div class="meta d-flex justify-content-between mt-1">
+      <span>{% if l.review_count %}<span class="stars"><i class="bi bi-star-fill"></i></span> {{ l.avg_rating|floatformat:1 }} ({{ l.review_count }}){% else %}New listing{% endif %}</span>
+      <span>{% if l.delivery_available %}<i class="bi bi-truck"></i> Delivery{% endif %}</span>
+    </div>
+  </div>
+</a>

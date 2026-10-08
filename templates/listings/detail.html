@@ -1,0 +1,71 @@
+{% extends "base.html" %}{% load humanize l10n %}
+{% block title %}{{ listing.title }} · Rent in {{ listing.city }} · {{ SITE.site_name }}{% endblock %}
+{% block meta %}{{ listing.title }} for rent in {{ listing.area }}, {{ listing.city }} — ৳{{ listing.price_per_day|floatformat:"0" }} per day.{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  {% if listing.status != 'active' %}<div class="alert alert-warning">This listing is <b>{{ listing.get_status_display|lower }}</b> and only visible to you{% if is_owner %} and staff{% endif %}.</div>{% endif %}
+  <nav class="small mb-3"><a href="{% url 'listings:list' %}">Items</a> / <a href="{% url 'listings:list' %}?category={{ listing.category.slug }}">{{ listing.category.name }}</a></nav>
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="gallery-main">{% with c=listing.cover %}{% if c %}<img id="gallery-main-img" src="{{ c.image.url }}" alt="{{ listing.title }}">{% else %}<div class="ph d-grid h-100 place-items-center" style="place-items:center;font-size:4rem;color:var(--pine)"><i class="bi {{ listing.category.icon }}"></i></div>{% endif %}{% endwith %}</div>
+      {% if listing.images.all|length > 1 %}<div class="thumbs">{% for im in listing.images.all %}<img data-gallery-thumb data-src="{{ im.image.url }}" src="{{ im.image.url }}" alt="Photo {{ forloop.counter }}" class="{% if forloop.first %}on{% endif %}">{% endfor %}</div>{% endif %}
+
+      <div class="d-flex justify-content-between align-items-start gap-3 mt-4">
+        <div><h1 class="h2 mb-1">{{ listing.title }}</h1>
+          <div class="meta"><i class="bi bi-geo-alt"></i> {{ listing.area }}, {{ listing.city }} · {{ listing.get_condition_display }}{% if listing.brand %} · {{ listing.brand }}{% endif %}</div>
+          {% if listing.review_count %}<div class="mt-1"><span class="stars"><i class="bi bi-star-fill"></i></span> <b>{{ listing.avg_rating|floatformat:1 }}</b> <span class="meta">({{ listing.review_count }} review{{ listing.review_count|pluralize }})</span></div>{% endif %}</div>
+        {% if user.is_authenticated and not is_owner %}<form method="post" action="{% url 'listings:favorite' listing.slug %}">{% csrf_token %}<button class="btn btn-ghost" aria-label="Save item"><i class="bi {% if is_favorite %}bi-heart-fill text-danger{% else %}bi-heart{% endif %}"></i></button></form>{% endif %}
+      </div>
+
+      <div class="panel mt-3"><h2>About this item</h2><p style="white-space:pre-line" class="mb-0">{{ listing.description }}</p></div>
+      {% if listing.rules %}<div class="panel mt-3"><h2>Owner's rules</h2><p style="white-space:pre-line" class="mb-0">{{ listing.rules }}</p></div>{% endif %}
+      <div class="panel mt-3"><h2>Rental terms</h2>
+        <ul class="mb-0 ps-3"><li>Rent for {{ listing.min_days }}–{{ listing.max_days }} days</li><li>Refundable security deposit: <b>৳{{ listing.security_deposit|floatformat:"0g" }}</b>, returned after the owner inspects the item</li>
+          <li>Handover: {% if listing.pickup_available %}pickup{% endif %}{% if listing.pickup_available and listing.delivery_available %} or {% endif %}{% if listing.delivery_available %}delivery (৳{{ listing.delivery_fee|floatformat:"0g" }}){% endif %}</li></ul></div>
+
+      <div class="panel mt-3"><h2>Reviews</h2>
+        {% for r in reviews %}<div class="py-2 border-top"><span class="stars">{% for i in "12345" %}<i class="bi bi-star{% if forloop.counter <= r.rating %}-fill{% endif %}"></i>{% endfor %}</span> <b>{{ r.reviewer.display_name }}</b> <span class="meta">{{ r.created_at|naturaltime }}</span>{% if r.comment %}<p class="mb-0">{{ r.comment }}</p>{% endif %}</div>
+        {% empty %}<p class="text-soft mb-0">No reviews yet. Be the first to rent and review.</p>{% endfor %}</div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="book-box">
+        <div class="panel" id="book-box" data-price="{{ listing.price_per_day|unlocalize }}" data-deposit="{{ listing.security_deposit|unlocalize }}" data-fee="{{ listing.delivery_fee|unlocalize }}">
+          <div class="d-flex align-items-baseline gap-2 mb-3"><span class="display-font fs-2 fw-bold">৳{{ listing.price_per_day|floatformat:"0g" }}</span><span class="text-soft">per day</span></div>
+          {% if is_owner %}
+            <p class="text-soft">This is your listing.</p>
+            <a class="btn btn-pine w-100 mb-2" href="{% url 'listings:update' listing.slug %}">Edit listing</a><a class="btn btn-ghost w-100" href="{% url 'listings:mine' %}">Manage my listings</a>
+          {% elif form %}
+            <form method="post" novalidate>{% csrf_token %}
+              {% include "partials/_form_errors.html" %}
+              <div class="row g-2"><div class="col-6">{% include "partials/_field.html" with field=form.start_date %}</div><div class="col-6">{% include "partials/_field.html" with field=form.end_date %}</div></div>
+              {% if form.delivery_method.field.choices|length > 1 %}{% include "partials/_field.html" with field=form.delivery_method %}{% else %}<input type="hidden" name="delivery_method" value="{{ form.delivery_method.field.initial }}">{% endif %}
+              {% include "partials/_field.html" with field=form.delivery_address %}
+              {% include "partials/_field.html" with field=form.message %}
+              <div id="calc" style="display:none">
+                <div class="price-line"><span>৳{{ listing.price_per_day|floatformat:"0g" }} × <span id="c-days">0 days</span></span><span id="c-rent">৳0</span></div>
+                <div class="price-line" id="c-fee-row" style="display:none"><span>Delivery fee</span><span id="c-fee">৳0</span></div>
+                <div class="price-line"><span>Refundable deposit</span><span>৳{{ listing.security_deposit|floatformat:"0g" }}</span></div>
+                <div class="price-line total"><span>Total to pay</span><span id="c-total">৳0</span></div>
+                <div class="small text-soft mb-3">You pay only after the owner accepts. The deposit comes back after the item is returned in good condition.</div>
+              </div>
+              <button class="btn btn-pine btn-lg w-100">{% if user.is_authenticated %}Request to rent{% else %}Log in to request{% endif %}</button>
+            </form>
+            {% if booked_ranges %}<div class="mt-3 small"><b>Already booked:</b><ul class="mb-0 ps-3">{% for r in booked_ranges %}<li>{{ r.start_date|date:"d M" }} – {{ r.end_date|date:"d M Y" }}</li>{% endfor %}</ul></div>{% endif %}
+          {% else %}
+            <p class="text-soft mb-0">This item isn't available to book right now.</p>
+          {% endif %}
+        </div>
+        <div class="panel mt-3 d-flex gap-3 align-items-center">
+          {% if listing.owner.avatar %}<img class="avatar avatar-lg" style="width:56px;height:56px" src="{{ listing.owner.avatar.url }}" alt="">{% else %}<span class="avatar" style="width:56px;height:56px;font-size:1.3rem">{{ listing.owner.display_name|slice:":1"|upper }}</span>{% endif %}
+          <div><div class="fw-bold"><a class="text-decoration-none" href="{% url 'accounts:public_profile' listing.owner.username %}">{{ listing.owner.display_name }}</a> {% if listing.owner.is_verified %}<i class="bi bi-patch-check-fill verified" title="Verified"></i>{% endif %}</div>
+            {% with r=listing.owner.rating_summary %}<div class="meta">{% if r.count %}★ {{ r.avg|floatformat:1 }} · {{ r.count }} review{{ r.count|pluralize }}{% else %}New owner{% endif %} · joined {{ listing.owner.date_joined|date:"M Y" }}</div>{% endwith %}</div>
+        </div>
+        <div class="panel mt-3 small"><i class="bi bi-shield-check text-pine me-1"></i> <b>Protected by BorrowHub.</b> Your payment and deposit are held by us until the item is returned. Never pay the owner directly.</div>
+      </div>
+    </div>
+  </div>
+
+  {% if similar %}<h2 class="h4 mt-5 mb-3">More in {{ listing.category.name }}</h2><div class="row g-3">{% for l in similar %}<div class="col-6 col-lg-3">{% include "partials/_listing_card.html" %}</div>{% endfor %}</div>{% endif %}
+</div>
+{% endblock %}

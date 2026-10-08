@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block title %}My listings · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="d-flex justify-content-between align-items-center mb-3"><h1 class="h2 mb-0">My listings</h1><a class="btn btn-jute" href="{% url 'listings:create' %}"><i class="bi bi-plus-lg me-1"></i>New listing</a></div>
+  {% if items %}
+  <div class="panel-flat table-responsive"><table class="table align-middle mb-0">
+    <thead><tr><th>Item</th><th>Price/day</th><th>Deposit</th><th>Views</th><th>Status</th><th></th></tr></thead>
+    <tbody>{% for l in items %}<tr>
+      <td><div class="d-flex align-items-center gap-3">{% with c=l.cover %}{% if c %}<img src="{{ c.image.url }}" style="width:64px;height:48px;object-fit:cover;border-radius:8px" alt="">{% endif %}{% endwith %}<div><a class="fw-bold" href="{{ l.get_absolute_url }}">{{ l.title }}</a><div class="meta">{{ l.area }}, {{ l.city }}</div></div></div></td>
+      <td>৳{{ l.price_per_day|floatformat:"0g" }}</td><td>৳{{ l.security_deposit|floatformat:"0g" }}</td><td>{{ l.views_count }}</td>
+      <td><span class="pill {% if l.status == 'active' %}ok{% elif l.status == 'pending' %}warn{% elif l.status == 'rejected' %}bad{% else %}muted{% endif %}">{{ l.get_status_display }}</span></td>
+      <td class="text-end text-nowrap"><a class="btn btn-sm btn-ghost" href="{% url 'listings:update' l.slug %}">Edit</a>
+        {% if l.status == 'active' or l.status == 'paused' %}<form class="d-inline" method="post" action="{% url 'listings:toggle' l.slug %}">{% csrf_token %}<button class="btn btn-sm btn-ghost">{% if l.status == 'active' %}Pause{% else %}Resume{% endif %}</button></form>{% endif %}
+        <a class="btn btn-sm btn-ghost text-danger" href="{% url 'listings:delete' l.slug %}">Delete</a></td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<div class="panel empty"><i class="bi bi-box-seam"></i><h2 class="h5 mt-2">You haven't listed anything yet</h2><p>List a camera, speaker or projector you don't use every day.</p><a class="btn btn-pine" href="{% url 'listings:create' %}">List your first item</a></div>{% endif %}
+</div>
+{% endblock %}

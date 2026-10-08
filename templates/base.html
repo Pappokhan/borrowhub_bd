@@ -1,0 +1,107 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE.site_name }} — Rent anything nearby{% endblock %}</title>
+  <meta name="description" content="{% block meta %}Rent cameras, projectors, speakers, laptops and event gear from people near you in Bangladesh — or earn money from things you don't use every day.{% endblock %}">
+  <meta name="theme-color" content="#0b6b4c">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230b6b4c'/%3E%3Cpath d='M18 26h24l-6-6m10 18H22l6 6' stroke='%23fff' stroke-width='5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <meta property="og:site_name" content="{{ SITE.site_name }}">
+  <meta property="og:title" content="{% block og_title %}{{ SITE.site_name }}{% endblock %}">
+  <meta property="og:description" content="{{ SITE.tagline }}">
+  <script>document.documentElement.classList.add('js');setTimeout(function(){if(!window.__bh)document.documentElement.classList.add('rv-fallback')},3000);</script>
+  <link rel="preload" href="{% static 'vendor/fonts/figtree-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="{% static 'vendor/fonts/bricolage-grotesque-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link href="{% static 'vendor/fonts/fonts.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'vendor/bootstrap-icons/bootstrap-icons.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/main.css' %}" rel="stylesheet">
+  <link href="{% static 'css/motion.css' %}" rel="stylesheet">
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div id="scroll-progress" aria-hidden="true"></div>
+<a class="visually-hidden-focusable position-absolute p-2 bg-white" href="#main">Skip to content</a>
+<nav class="bh-nav">
+  <div class="container d-flex align-items-center gap-3 py-2">
+    <a class="brand" href="{% url 'core:home' %}"><span class="brand-mark"><i class="bi bi-arrow-left-right"></i></span><span>Borrow<b>Hub</b> <small>BD</small></span></a>
+    <div class="d-none d-lg-flex gap-1 ms-3">
+      <a class="nav-link" href="{% url 'listings:list' %}">Browse items</a>
+      <a class="nav-link" href="{% url 'core:how_it_works' %}">How it works</a>
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <a class="btn btn-jute d-none d-sm-inline-flex" href="{% url 'listings:create' %}"><i class="bi bi-plus-lg me-1"></i>List an item</a>
+      {% if user.is_authenticated %}
+        <a class="nav-link bell px-2{% if unread_count %} has-new{% endif %}" href="{% url 'core:notifications' %}" title="Notifications" aria-label="Notifications"><i class="bi bi-bell fs-5"></i>{% if unread_count %}<span class="count">{{ unread_count }}</span>{% endif %}</a>
+        <div class="dropdown">
+          <button class="btn p-0 border-0" data-bs-toggle="dropdown" aria-label="Account menu">
+            {% if user.avatar %}<img class="avatar" src="{{ user.avatar.url }}" alt="">{% else %}<span class="avatar">{{ user.display_name|slice:":1"|upper }}</span>{% endif %}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li class="px-3 py-1 small text-soft">Signed in as <b>{{ user.username }}</b></li>
+            <li><a class="dropdown-item" href="{% url 'accounts:dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li><a class="dropdown-item" href="{% url 'bookings:list' %}"><i class="bi bi-calendar-check me-2"></i>My rentals</a></li>
+            <li><a class="dropdown-item" href="{% url 'bookings:list' %}?role=owner"><i class="bi bi-inbox me-2"></i>Requests for my items</a></li>
+            <li><a class="dropdown-item" href="{% url 'listings:mine' %}"><i class="bi bi-box-seam me-2"></i>My listings</a></li>
+            <li><a class="dropdown-item" href="{% url 'listings:favorites' %}"><i class="bi bi-heart me-2"></i>Saved items</a></li>
+            <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="bi bi-person-gear me-2"></i>Profile & payouts</a></li>
+            {% if user.is_staff %}<li><hr class="dropdown-divider"></li><li><a class="dropdown-item" href="{% url 'admin:index' %}"><i class="bi bi-shield-lock me-2"></i>Admin panel</a></li>{% endif %}
+            <li><hr class="dropdown-divider"></li>
+            <li><form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-right me-2"></i>Log out</button></form></li>
+          </ul>
+        </div>
+      {% else %}
+        <a class="btn btn-ghost" href="{% url 'accounts:login' %}">Log in</a>
+        <a class="btn btn-pine d-none d-sm-inline-flex" href="{% url 'accounts:register' %}">Sign up</a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+{% if messages %}
+<div class="container pt-3">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show mb-2" role="alert">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<main id="main">{% block content %}{% endblock %}</main>
+
+<footer class="footer mt-5 pt-5 pb-4">
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-5">
+        <div class="brand text-white mb-2"><span class="brand-mark"><i class="bi bi-arrow-left-right"></i></span> BorrowHub BD</div>
+        <p class="maxw-60">{{ SITE.tagline }} Bangladesh's peer-to-peer rental marketplace — rent what you need for a day, earn from what you rarely use.</p>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6>Marketplace</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{% url 'listings:list' %}">Browse items</a></li>
+          <li><a href="{% url 'listings:create' %}">List an item</a></li>
+          <li><a href="{% url 'core:how_it_works' %}">How it works</a></li>
+        </ul>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6>Company</h6>
+        <ul class="list-unstyled small">
+          <li><a href="{% url 'core:terms' %}">Terms & deposit policy</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact us</a></li>
+        </ul>
+      </div>
+      <div class="col-lg-3">
+        <h6>Support</h6>
+        <div class="small">{{ SITE.support_phone }}<br>{{ SITE.support_email }}<br>{{ SITE.office_address }}</div>
+      </div>
+    </div>
+    <hr class="border-secondary mt-4">
+    <div class="small d-flex justify-content-between flex-wrap gap-2"><span>© {% now "Y" %} {{ SITE.site_name }}. All rights reserved.</span><span>Payments via bKash · Nagad · Rocket</span></div>
+  </div>
+</footer>
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script src="{% static 'js/main.js' %}" defer></script>
+{% block js %}{% endblock %}
+</body>
+</html>

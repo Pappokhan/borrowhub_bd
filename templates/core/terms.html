@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Terms & deposit policy · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:820px">
+  <h1 class="mb-4">Terms & deposit policy</h1>
+  <div class="panel">
+    <p class="text-soft">This is a starter policy for your marketplace. Have a lawyer review it before launch.</p>
+    <h2>1. The marketplace</h2><p>{{ SITE.site_name }} connects owners who list items with renters who need them for a short time. We manage booking, payment collection, security deposits and payouts. The rental agreement is between the owner and the renter.</p>
+    <h2>2. Fees</h2><p>Renters pay the listed daily price for the booked days, plus a delivery fee if delivery is chosen, plus a refundable security deposit. Owners pay a commission of {{ SITE.commission_percent|floatformat:"-1" }}% of the rental amount, deducted when the rental completes.</p>
+    <h2>3. Payment</h2><p>Renters pay {{ SITE.site_name }} (not the owner) using bKash, Nagad or Rocket. Owners should hand over an item only after the booking shows <b>Paid</b>.</p>
+    <h2>4. Security deposit</h2><p>The deposit is held until the owner inspects the returned item. The owner may deduct the cost of damage up to the deposit amount, with a written note. The renter may accept or dispute within {{ SITE.inspection_window_hours }} hours; silence counts as acceptance.</p>
+    <h2>5. Cancellations</h2><p>Bookings can be cancelled before handover. Paid bookings are refunded in full. Requests not answered within 48 hours, and accepted bookings not paid within {{ SITE.payment_window_hours }} hours, expire automatically.</p>
+    <h2>6. Prohibited items & conduct</h2><p>No illegal items, weapons or hazardous goods. Members must give accurate descriptions and treat items with care. Accounts that break these rules can be suspended.</p>
+    <h2>7. Disputes</h2><p>If members can't agree, {{ SITE.site_name }} staff review the evidence and make a final decision on the deposit.</p>
+  </div>
+</div>
+{% endblock %}

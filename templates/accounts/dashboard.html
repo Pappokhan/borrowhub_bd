@@ -1,0 +1,52 @@
+{% extends "base.html" %}{% block title %}Dashboard · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="d-flex justify-content-between align-items-end flex-wrap gap-2 mb-4">
+    <div><h1 class="h2 mb-0">Hi, {{ user.first_name|default:user.username }}</h1><div class="text-soft">{% if user.is_verified %}<i class="bi bi-patch-check-fill verified"></i> Verified member{% else %}Your account isn't verified yet{% endif %}</div></div>
+    <div class="d-flex gap-2"><a class="btn btn-jute" href="{% url 'listings:create' %}"><i class="bi bi-plus-lg me-1"></i>List an item</a><a class="btn btn-ghost" href="{% url 'listings:list' %}">Browse</a></div>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3"><div class="stat"><div class="v text-pine" data-count="{{ earnings|floatformat:"0" }}" data-prefix="৳">৳{{ earnings|floatformat:"0g" }}</div><div class="l">Earned from rentals</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="v" data-count="{{ spent|floatformat:"0" }}" data-prefix="৳">৳{{ spent|floatformat:"0g" }}</div><div class="l">Spent on rentals</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="v">{{ active_listing_count }}<small class="fs-6 text-soft"> / {{ listing_count }}</small></div><div class="l">Active listings</div></div></div>
+    <div class="col-6 col-lg-3"><div class="stat"><div class="v" data-count="{{ rentals_count }}">{{ rentals_count }}</div><div class="l">Items you've rented</div></div></div>
+  </div>
+
+  {% if completeness < 100 %}
+  <div class="panel mb-4 d-flex align-items-center gap-3 flex-wrap">
+    <div class="flex-grow-1"><b>Your profile is {{ completeness }}% complete.</b> <span class="text-soft">Add a payout number and verify your NID to get paid and build trust.</span>
+      <div class="progress mt-2" style="height:8px"><div class="progress-bar bg-success" style="width:{{ completeness }}%"></div></div></div>
+    <a class="btn btn-ghost" href="{% url 'accounts:profile' %}">Edit profile</a>
+    {% if not user.is_verified %}<a class="btn btn-pine" href="{% url 'accounts:verification' %}">Get verified</a>{% endif %}
+  </div>
+  {% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="panel h-100"><h2>Requests to review</h2>
+        {% for b in pending_requests %}<div class="d-flex justify-content-between align-items-center py-2 border-top"><div><a class="fw-bold" href="{{ b.get_absolute_url }}">{{ b.listing.title|truncatechars:34 }}</a><div class="meta">{{ b.renter.display_name }} · {{ b.start_date|date:"d M" }}–{{ b.end_date|date:"d M" }}</div></div><a class="btn btn-pine btn-sm" href="{{ b.get_absolute_url }}">Respond</a></div>
+        {% empty %}<p class="text-soft mb-0">No pending requests.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel h-100"><h2>Waiting for your payment</h2>
+        {% for b in to_pay %}<div class="d-flex justify-content-between align-items-center py-2 border-top"><div><a class="fw-bold" href="{{ b.get_absolute_url }}">{{ b.listing.title|truncatechars:34 }}</a><div class="meta">Total ৳{{ b.total_payable|floatformat:"0g" }}</div></div><a class="btn btn-jute btn-sm" href="{{ b.get_absolute_url }}">Pay now</a></div>
+        {% empty %}<p class="text-soft mb-0">Nothing to pay right now.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel h-100"><h2>Items you're renting out</h2>
+        {% for b in owner_todo %}<div class="d-flex justify-content-between align-items-center py-2 border-top"><div><a class="fw-bold" href="{{ b.get_absolute_url }}">{{ b.listing.title|truncatechars:34 }}</a><div class="meta">{{ b.renter.display_name }} · until {{ b.end_date|date:"d M" }}</div></div>{% include "partials/_status.html" with b=b %}</div>
+        {% empty %}<p class="text-soft mb-0">None right now.</p>{% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel h-100"><h2>Items you've rented</h2>
+        {% for b in renter_live %}<div class="d-flex justify-content-between align-items-center py-2 border-top"><div><a class="fw-bold" href="{{ b.get_absolute_url }}">{{ b.listing.title|truncatechars:34 }}</a><div class="meta">from {{ b.owner.display_name }} · until {{ b.end_date|date:"d M" }}</div></div>{% include "partials/_status.html" with b=b %}</div>
+        {% empty %}<p class="text-soft mb-0">None right now.</p>{% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

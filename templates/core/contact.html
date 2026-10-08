@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Contact · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="row g-4">
+    <div class="col-lg-5"><h1>Contact us</h1><p class="text-soft">Questions about a booking, a payment or a listing? Send us a note and include your booking code if you have one.</p>
+      <div class="panel"><div class="mb-2"><i class="bi bi-telephone me-2 text-pine"></i>{{ SITE.support_phone }}</div><div class="mb-2"><i class="bi bi-envelope me-2 text-pine"></i>{{ SITE.support_email }}</div><div><i class="bi bi-geo-alt me-2 text-pine"></i>{{ SITE.office_address }}</div></div></div>
+    <div class="col-lg-7"><div class="panel"><form method="post">{% csrf_token %}{% include "partials/_form_errors.html" %}{% for field in form %}{% include "partials/_field.html" %}{% endfor %}<button class="btn btn-pine">Send message</button></form></div></div>
+  </div>
+</div>
+{% endblock %}

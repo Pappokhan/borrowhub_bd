@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Saved items · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight"><h1 class="h2 mb-3">Saved items</h1>
+{% if items %}<div class="row g-3">{% for l in items %}<div class="col-6 col-lg-3">{% include "partials/_listing_card.html" %}</div>{% endfor %}</div>
+{% else %}<div class="panel empty"><i class="bi bi-heart"></i><p class="mt-2">Tap the heart on any listing to save it here.</p><a class="btn btn-pine" href="{% url 'listings:list' %}">Browse items</a></div>{% endif %}</div>
+{% endblock %}

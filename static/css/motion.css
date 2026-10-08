@@ -1,0 +1,119 @@
+/* BorrowHub BD — motion layer. Everything here is disabled for users who prefer reduced motion. */
+:root { --ease-out: cubic-bezier(.2, .7, .2, 1); --ease-spring: cubic-bezier(.34, 1.56, .64, 1); }
+
+/* ---------- page + scroll progress ---------- */
+body { animation: pageIn .45s ease-out both; }
+@keyframes pageIn { from { opacity: 0; } to { opacity: 1; } }
+#scroll-progress { position: fixed; inset: 0 0 auto 0; height: 3px; z-index: 2000; background: linear-gradient(90deg, var(--pine), var(--jute)); transform: scaleX(0); transform-origin: 0 50%; pointer-events: none; }
+.bh-nav { transition: box-shadow .25s ease; }
+.bh-nav.scrolled { box-shadow: 0 6px 24px rgba(16, 34, 28, .08); }
+
+/* ---------- scroll reveal (CSS animation so hover transforms still work) ---------- */
+.js :is(.listing-card, .panel, .panel-flat, .stat, .cat-tile, .section-title, .step-list li, .empty, .gallery-main, .accordion-item, .notif-item):not(.in) { opacity: 0; }
+.js :is(.listing-card, .panel, .panel-flat, .stat, .cat-tile, .section-title, .step-list li, .empty, .gallery-main, .accordion-item, .notif-item).in {
+  animation: revealUp .65s var(--ease-out) both; animation-delay: calc(min(var(--i, 0), 8) * 70ms);
+}
+.rv-fallback :is(.listing-card, .panel, .panel-flat, .stat, .cat-tile, .section-title, .step-list li, .empty, .gallery-main, .accordion-item, .notif-item) { opacity: 1 !important; }
+@keyframes revealUp { from { opacity: 0; translate: 0 24px; } to { opacity: 1; translate: 0 0; } }
+
+/* ---------- hero entrance ---------- */
+.hero h1 .line { display: block; overflow: hidden; padding-bottom: .08em; }
+.hero h1 .line > span { display: inline-block; animation: lineRise .9s var(--ease-out) both; animation-delay: calc(.1s + var(--l, 0) * .14s); }
+@keyframes lineRise { from { translate: 0 110%; opacity: 0; } to { translate: 0 0; opacity: 1; } }
+.hero .lead, .hero .search-bar, .hero .hero-stats { animation: fadeUp .8s var(--ease-out) both; }
+.hero .lead { animation-delay: .45s; } .hero .search-bar { animation-delay: .6s; } .hero .hero-stats { animation-delay: .75s; }
+@keyframes fadeUp { from { opacity: 0; translate: 0 18px; } to { opacity: 1; translate: 0 0; } }
+.hero::after { animation: glow 7s ease-in-out infinite alternate; }
+@keyframes glow { from { opacity: .55; scale: .92; } to { opacity: 1; scale: 1.08; } }
+.hero::before { content: ""; position: absolute; left: -12%; top: -30%; width: 45%; aspect-ratio: 1; background: radial-gradient(circle, rgba(255,255,255,.08), transparent 65%); animation: drift 14s ease-in-out infinite alternate; pointer-events: none; }
+@keyframes drift { from { translate: 0 0; } to { translate: 14% 18%; } }
+.search-bar { transition: box-shadow .25s, translate .25s var(--ease-out); }
+.search-bar:focus-within { box-shadow: 0 16px 40px rgba(0, 0, 0, .28), 0 0 0 3px var(--jute); translate: 0 -2px; }
+
+.rent-tag { animation: tagIn .9s var(--ease-spring) both, bob 6s ease-in-out infinite; animation-delay: calc(.5s + var(--i) * .16s), calc(1.5s + var(--i) * .5s); }
+@keyframes tagIn { from { opacity: 0; translate: 0 50px; scale: .9; } to { opacity: 1; translate: 0 0; scale: 1; } }
+@keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+
+/* ---------- ticker band ---------- */
+.ticker { background: var(--jute); color: var(--ink); overflow: hidden; white-space: nowrap; border-block: 1px solid #e3a516; }
+.ticker-track { display: inline-flex; gap: 2.5rem; padding: .7rem 0; animation: ticker 38s linear infinite; font-family: var(--font-display); font-weight: 700; }
+.ticker:hover .ticker-track { animation-play-state: paused; }
+.ticker span::after { content: "✦"; margin-left: 2.5rem; opacity: .55; }
+@keyframes ticker { to { translate: -50% 0; } }
+
+/* ---------- cards / tiles / buttons ---------- */
+.listing-card { transition: translate .3s var(--ease-out), box-shadow .3s, border-color .2s; }
+.listing-card:hover { translate: 0 -6px; box-shadow: 0 18px 36px rgba(16, 34, 28, .13); }
+.listing-media { overflow: hidden; background: linear-gradient(100deg, var(--pine-tint) 30%, #f3faf6 50%, var(--pine-tint) 70%); background-size: 200% 100%; animation: shimmer 1.6s linear infinite; }
+.listing-media img { transition: transform .6s var(--ease-out), opacity .5s; }
+.js .listing-media img:not(.loaded) { opacity: 0; }
+.listing-card:hover .listing-media img { transform: scale(1.07); }
+@keyframes shimmer { to { background-position: -200% 0; } }
+.price-tag { transition: translate .3s var(--ease-spring), rotate .3s var(--ease-spring); }
+.listing-card:hover .price-tag { translate: 4px -3px; rotate: -3deg; }
+.cat-tile { position: relative; overflow: hidden; transition: translate .25s var(--ease-out), border-color .2s, background .2s, box-shadow .25s; }
+.cat-tile:hover { translate: 0 -3px; box-shadow: 0 10px 22px rgba(16, 34, 28, .1); }
+.cat-tile i { transition: transform .35s var(--ease-spring); }
+.cat-tile:hover i { transform: scale(1.25) rotate(-8deg); }
+.panel, .stat { transition: box-shadow .25s, border-color .2s; }
+.stat:hover { box-shadow: 0 10px 24px rgba(16, 34, 28, .09); border-color: var(--pine); }
+
+.btn { position: relative; overflow: hidden; transition: translate .2s var(--ease-out), box-shadow .2s, background-color .2s, border-color .2s, color .2s; }
+.btn:hover { translate: 0 -2px; }
+.btn:active { translate: 0 0; scale: .98; }
+.btn-pine:hover { box-shadow: 0 10px 20px rgba(11, 107, 76, .3); }
+.btn-jute:hover { box-shadow: 0 10px 20px rgba(242, 182, 50, .45); }
+.ripple { position: absolute; border-radius: 50%; background: currentColor; opacity: .25; pointer-events: none; scale: 0; animation: ripple .6s ease-out forwards; }
+@keyframes ripple { to { scale: 4; opacity: 0; } }
+.btn.is-loading { pointer-events: none; color: transparent !important; }
+.btn.is-loading::after { content: ""; position: absolute; inset: 0; margin: auto; width: 1.1em; height: 1.1em; border-radius: 50%; border: 2px solid rgba(255, 255, 255, .45); border-top-color: #fff; animation: spin .7s linear infinite; }
+.btn-ghost.is-loading::after, .btn-jute.is-loading::after { border-color: rgba(16, 34, 28, .25); border-top-color: var(--ink); }
+@keyframes spin { to { rotate: 360deg; } }
+
+/* ---------- navbar bits, alerts, menus ---------- */
+.bell.has-new i { transform-origin: 50% 0; animation: ring 3s ease-in-out 1.2s infinite; }
+@keyframes ring { 0%, 12%, 100% { rotate: 0deg; } 3% { rotate: 16deg; } 6% { rotate: -14deg; } 9% { rotate: 9deg; } }
+.bell .count { animation: pop .5s var(--ease-spring) both .8s; }
+@keyframes pop { from { scale: 0; } to { scale: 1; } }
+.alert { animation: slideDown .45s var(--ease-out) both; }
+.alert.closing { transition: opacity .35s, translate .35s; opacity: 0; translate: 0 -10px; }
+@keyframes slideDown { from { opacity: 0; translate: 0 -14px; } to { opacity: 1; translate: 0 0; } }
+.dropdown-menu.show { animation: menuIn .2s var(--ease-out) both; transform-origin: top right; }
+@keyframes menuIn { from { opacity: 0; translate: 0 -8px; scale: .96; } to { opacity: 1; translate: 0 0; scale: 1; } }
+.bi-heart-fill { animation: heartPop .6s var(--ease-spring) both; display: inline-block; }
+@keyframes heartPop { 0% { scale: .3; } 55% { scale: 1.35; } 100% { scale: 1; } }
+.pill { animation: fadeUp .5s var(--ease-out) both; }
+.avatar { transition: scale .2s var(--ease-spring); }
+a:hover > .avatar, .btn:hover > .avatar { scale: 1.08; }
+
+/* ---------- stepper ---------- */
+.stepper li.done::before { animation: dotIn .5s var(--ease-spring) both; animation-delay: calc(var(--i, 0) * .14s + .2s); }
+.stepper li.done::after { transform-origin: 0 50%; animation: lineGrow .5s var(--ease-out) both; animation-delay: calc(var(--i, 0) * .14s); }
+.stepper li.now::before { animation: dotIn .5s var(--ease-spring) both, pulseRing 2s ease-out infinite; animation-delay: calc(var(--i, 0) * .14s + .2s), 1.2s; }
+@keyframes dotIn { from { scale: 0; } to { scale: 1; } }
+@keyframes lineGrow { from { scale: 0 1; } to { scale: 1 1; } }
+@keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(11, 107, 76, .45); } 100% { box-shadow: 0 0 0 12px rgba(11, 107, 76, 0); } }
+
+/* ---------- misc ---------- */
+.progress-bar { transition: width 1.2s var(--ease-out); }
+.price-line.total span:last-child { display: inline-block; }
+.price-line.bump span:last-child { animation: bump .35s var(--ease-spring); }
+@keyframes bump { 50% { scale: 1.12; color: var(--pine); } }
+#calc { transition: opacity .3s; }
+.step-list li::before { transition: scale .3s var(--ease-spring); }
+.step-list li:hover::before { scale: 1.12; }
+.accordion-button { transition: background-color .2s, color .2s, box-shadow .2s; }
+.thumbs img { transition: border-color .2s, scale .2s var(--ease-spring); }
+.thumbs img:hover { scale: 1.06; }
+.gallery-main img { transition: opacity .25s; }
+.gallery-main img.swap { opacity: 0; }
+.footer a { transition: color .2s, padding-left .2s; }
+.footer li a:hover { padding-left: 4px; }
+
+/* ---------- reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .js :is(.listing-card, .panel, .panel-flat, .stat, .cat-tile, .section-title, .step-list li, .empty, .gallery-main, .accordion-item, .notif-item),
+  .js .listing-media img:not(.loaded) { opacity: 1 !important; }
+  .ticker { overflow-x: auto; }
+}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block title %}{% if role == 'owner' %}Requests for my items{% else %}My rentals{% endif %} · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <h1 class="h2 mb-3">Bookings</h1>
+  <ul class="nav nav-pills mb-3 gap-2">
+    <li class="nav-item"><a class="btn {% if role == 'renter' %}btn-pine{% else %}btn-ghost{% endif %}" href="?role=renter">Items I'm renting <span class="opacity-75">({{ counts.renter }})</span></a></li>
+    <li class="nav-item"><a class="btn {% if role == 'owner' %}btn-pine{% else %}btn-ghost{% endif %}" href="?role=owner">Requests for my items <span class="opacity-75">({{ counts.owner }})</span></a></li>
+  </ul>
+  <form method="get" class="mb-3 d-flex gap-2 align-items-center"><input type="hidden" name="role" value="{{ role }}">
+    <label for="status" class="small text-soft">Status</label>
+    <select id="status" name="status" class="form-select form-select-sm" style="width:auto" onchange="this.form.submit()"><option value="">All</option>{% for v, n in statuses %}<option value="{{ v }}" {% if status == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></form>
+  {% if bookings %}
+  <div class="panel-flat table-responsive"><table class="table align-middle mb-0">
+    <thead><tr><th>Booking</th><th>Item</th><th>{% if role == 'owner' %}Renter{% else %}Owner{% endif %}</th><th>Dates</th><th>Total</th><th>Status</th></tr></thead>
+    <tbody>{% for b in bookings %}<tr>
+      <td><a class="fw-bold" href="{{ b.get_absolute_url }}">{{ b.code }}</a><div class="meta">{{ b.created_at|date:"d M Y" }}</div></td>
+      <td>{{ b.listing.title|truncatechars:38 }}</td>
+      <td>{% if role == 'owner' %}{{ b.renter.display_name }}{% else %}{{ b.owner.display_name }}{% endif %}</td>
+      <td class="text-nowrap">{{ b.start_date|date:"d M" }} – {{ b.end_date|date:"d M" }}<div class="meta">{{ b.days }} day{{ b.days|pluralize }}</div></td>
+      <td>{% if role == 'owner' %}<b>৳{{ b.owner_payout|floatformat:"0g" }}</b><div class="meta">your earnings</div>{% else %}<b>৳{{ b.total_payable|floatformat:"0g" }}</b>{% endif %}</td>
+      <td>{% include "partials/_status.html" %}</td></tr>{% endfor %}</tbody></table></div>
+  {% else %}<div class="panel empty"><i class="bi bi-calendar2-x"></i><p class="mt-2 mb-3">{% if role == 'owner' %}No requests yet. Listings with clear photos and fair prices get booked faster.{% else %}You haven't rented anything yet.{% endif %}</p><a class="btn btn-pine" href="{% url 'listings:list' %}">Browse items</a></div>{% endif %}
+</div>
+{% endblock %}

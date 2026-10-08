@@ -1,0 +1,2 @@
+{% extends "base.html" %}{% block title %}Page not found · {{ SITE.site_name }}{% endblock %}
+{% block content %}<div class="container empty my-5"><i class="bi bi-compass"></i><h1 class="mt-3">We couldn't find that page</h1><p>The link may be old, or the item may no longer be listed.</p><a class="btn btn-pine" href="{% url 'core:home' %}">Back to home</a></div>{% endblock %}

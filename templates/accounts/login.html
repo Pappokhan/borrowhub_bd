@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Log in · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:460px">
+  <div class="panel">
+    <h1 class="h3 mb-1">Welcome back</h1><p class="text-soft">Log in with your username or email.</p>
+    <form method="post">{% csrf_token %}
+      {% include "partials/_form_errors.html" %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% for field in form %}{% include "partials/_field.html" %}{% endfor %}
+      <button class="btn btn-pine w-100">Log in</button>
+    </form>
+    <p class="text-center mt-3 mb-0 small">New here? <a href="{% url 'accounts:register' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a></p>
+  </div>
+</div>
+{% endblock %}

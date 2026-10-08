@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}{{ member.display_name }} · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="panel d-flex gap-4 flex-wrap align-items-center mb-4">
+    {% if member.avatar %}<img class="avatar avatar-lg" src="{{ member.avatar.url }}" alt="">{% else %}<span class="avatar avatar-lg">{{ member.display_name|slice:":1"|upper }}</span>{% endif %}
+    <div class="flex-grow-1">
+      <h1 class="h3 mb-1">{{ member.display_name }} {% if member.is_verified %}<i class="bi bi-patch-check-fill verified" title="Verified member"></i>{% endif %}</h1>
+      <div class="meta">{% if member.city %}<i class="bi bi-geo-alt"></i> {{ member.area }}, {{ member.city }} · {% endif %}Member since {{ member.date_joined|date:"M Y" }}</div>
+      {% with r=member.rating_summary %}<div class="mt-1">{% if r.count %}<span class="stars"><i class="bi bi-star-fill"></i></span> <b>{{ r.avg|floatformat:1 }}</b> <span class="meta">({{ r.count }} review{{ r.count|pluralize }})</span>{% else %}<span class="meta">No reviews yet</span>{% endif %} · <span class="meta">{{ done }} rental{{ done|pluralize }} completed as owner</span></div>{% endwith %}
+      {% if member.bio %}<p class="mt-2 mb-0">{{ member.bio }}</p>{% endif %}
+    </div>
+  </div>
+  <h2 class="h4 mb-3">Items by {{ member.first_name|default:member.username }}</h2>
+  <div class="row g-3 mb-5">{% for l in listings %}<div class="col-6 col-lg-3">{% include "partials/_listing_card.html" %}</div>{% empty %}<div class="col-12 text-soft">No active listings.</div>{% endfor %}</div>
+  <h2 class="h4 mb-3">Reviews</h2>
+  <div class="panel-flat">{% for r in reviews %}<div class="p-3 border-bottom"><span class="stars">{% for i in "12345" %}<i class="bi bi-star{% if forloop.counter <= r.rating %}-fill{% endif %}"></i>{% endfor %}</span> <b>{{ r.reviewer.display_name }}</b> <span class="meta">on {{ r.listing.title }} · {{ r.created_at|date:"d M Y" }}</span>{% if r.comment %}<p class="mb-0 mt-1">{{ r.comment }}</p>{% endif %}</div>{% empty %}<div class="p-3 text-soft">No reviews yet.</div>{% endfor %}</div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{% extends "base.html" %}{% block title %}Notifications · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:760px">
+  <h1 class="mb-3">Notifications</h1>
+  <div class="panel-flat overflow-hidden">
+    {% for n in items %}<a class="notif-item" href="{{ n.url|default:'#' }}"><div>{{ n.message }}</div><div class="meta">{{ n.created_at|timesince }} ago</div></a>
+    {% empty %}<div class="empty"><i class="bi bi-bell"></i><p class="mt-2 mb-0">You're all caught up. Booking updates will show up here.</p></div>{% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "admin/index.html" %}
+{% block extrastyle %}{{ block.super }}
+<style>
+  .bh-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:0 0 22px}
+  .bh-card{display:block;background:var(--body-bg,#fff);border:1px solid var(--hairline-color,#ddd);border-radius:10px;padding:14px 16px;color:inherit}
+  .bh-card .v{font-size:24px;font-weight:700;line-height:1.1}
+  .bh-card .l{color:var(--body-quiet-color,#666);font-size:12px;margin-top:4px}
+  .bh-card.alert{border-color:#d93b3b}.bh-card.alert .v{color:#d93b3b}
+  .bh-card.good .v{color:#0b6b4c}
+  .bh-h{font-size:14px;margin:6px 0 10px;color:var(--body-quiet-color,#666);font-weight:600}
+  .bh-two{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+  @media(max-width:900px){.bh-two{grid-template-columns:1fr}}
+  .bh-two table{width:100%}
+</style>
+{% endblock %}
+{% block content %}
+{% if stats %}
+<h2 class="bh-h">Money</h2>
+<div class="bh-grid">
+  <div class="bh-card good"><div class="v">৳{{ stats.commission|floatformat:"0g" }}</div><div class="l">Commission earned (all time)</div></div>
+  <div class="bh-card good"><div class="v">৳{{ stats.commission_month|floatformat:"0g" }}</div><div class="l">Commission this month</div></div>
+  <div class="bh-card"><div class="v">৳{{ stats.gmv|floatformat:"0g" }}</div><div class="l">Rental value completed (GMV)</div></div>
+  <div class="bh-card"><div class="v">৳{{ stats.deposits_held|floatformat:"0g" }}</div><div class="l">Security deposits held</div></div>
+</div>
+<h2 class="bh-h">Needs your attention</h2>
+<div class="bh-grid">
+  <a class="bh-card {% if stats.payments_to_verify %}alert{% endif %}" href="{% url 'admin:bookings_payment_changelist' %}?kind__exact=collection&status__exact=pending"><div class="v">{{ stats.payments_to_verify }}</div><div class="l">Payments to verify</div></a>
+  <a class="bh-card {% if stats.payouts_pending %}alert{% endif %}" href="{% url 'admin:bookings_payment_changelist' %}?status__exact=pending"><div class="v">{{ stats.payouts_pending }}</div><div class="l">Payouts/refunds to send (৳{{ stats.payouts_pending_amount|floatformat:"0g" }})</div></a>
+  <a class="bh-card {% if stats.disputes_open %}alert{% endif %}" href="{% url 'admin:bookings_dispute_changelist' %}"><div class="v">{{ stats.disputes_open }}</div><div class="l">Open disputes</div></a>
+  <a class="bh-card {% if stats.pending_verifications %}alert{% endif %}" href="{% url 'admin:accounts_user_changelist' %}?verification_status__exact=pending"><div class="v">{{ stats.pending_verifications }}</div><div class="l">NID verifications</div></a>
+  <a class="bh-card {% if stats.listings_pending %}alert{% endif %}" href="{% url 'admin:listings_listing_changelist' %}?status__exact=pending"><div class="v">{{ stats.listings_pending }}</div><div class="l">Listings awaiting approval</div></a>
+</div>
+<h2 class="bh-h">Marketplace</h2>
+<div class="bh-grid">
+  <div class="bh-card"><div class="v">{{ stats.users }}</div><div class="l">Members</div></div>
+  <div class="bh-card"><div class="v">{{ stats.listings_active }}</div><div class="l">Active listings</div></div>
+  <div class="bh-card"><div class="v">{{ stats.bookings_live }}</div><div class="l">Live bookings</div></div>
+  <div class="bh-card"><div class="v">{{ stats.bookings_total }}</div><div class="l">Bookings all time</div></div>
+</div>
+<div class="bh-two">
+  <div><h2 class="bh-h">Recent bookings</h2>
+    <table><thead><tr><th>Code</th><th>Item</th><th>Status</th><th>Total</th></tr></thead><tbody>
+    {% for b in recent_bookings %}<tr><td><a href="{% url 'admin:bookings_booking_change' b.pk %}">{{ b.code }}</a></td><td>{{ b.listing.title|truncatechars:34 }}</td><td>{{ b.get_status_display }}</td><td>৳{{ b.total_payable|floatformat:"0g" }}</td></tr>
+    {% empty %}<tr><td colspan="4">No bookings yet.</td></tr>{% endfor %}</tbody></table></div>
+  <div><h2 class="bh-h">Most booked listings</h2>
+    <table><thead><tr><th>Item</th><th>Bookings</th></tr></thead><tbody>
+    {% for l in top_listings %}<tr><td><a href="{% url 'admin:listings_listing_change' l.pk %}">{{ l.title|truncatechars:44 }}</a></td><td>{{ l.n }}</td></tr>
+    {% empty %}<tr><td colspan="2">Nothing yet.</td></tr>{% endfor %}</tbody></table></div>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}

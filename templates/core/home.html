@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="container py-5">
+    <div class="row align-items-center g-5 py-lg-4">
+      <div class="col-lg-7">
+        <h1 class="mb-3"><span class="line" style="--l:0"><span>Kenar dorkar nei.</span></span><span class="line" style="--l:1"><span>Proyojon hole rent nao.</span></span></h1>
+        <p class="lead fs-5 mb-4">Need a projector for one meeting or a DSLR for one wedding? Rent it from someone nearby for a day. Got gear gathering dust? Let it earn for you.</p>
+        <form class="search-bar" action="{% url 'listings:list' %}" method="get">
+          <div class="field"><label class="visually-hidden" for="hq">What do you need?</label><input id="hq" class="form-control" name="q" placeholder="What do you need? e.g. projector"></div>
+          <div class="field"><label class="visually-hidden" for="hc">City</label>
+            <select id="hc" class="form-select" name="city"><option value="">Anywhere in BD</option>{% for v, n in cities %}<option value="{{ v }}">{{ n }}</option>{% endfor %}</select></div>
+          <button class="btn btn-pine px-4" type="submit"><i class="bi bi-search me-1"></i>Search</button>
+        </form>
+        <div class="hero-stats d-flex flex-wrap gap-4 mt-4 small" style="color:#cfe5db">
+          <span><b class="text-white fs-5 display-font" data-count="{{ stats.listings }}">{{ stats.listings }}</b> items listed</span>
+          <span><b class="text-white fs-5 display-font" data-count="{{ stats.members }}">{{ stats.members }}</b> members</span>
+          <span><b class="text-white fs-5 display-font" data-count="{{ stats.completed }}">{{ stats.completed }}</b> rentals completed</span>
+        </div>
+      </div>
+      <div class="col-lg-5">
+        <div class="tag-stack" aria-hidden="true">
+          <div class="rent-tag" style="--i:0"><div class="name">Epson projector, 3600 lm</div><div class="rate">৳1,200 <small class="fw-normal text-soft">/ day</small></div><div class="where">Dhanmondi, Dhaka · deposit ৳5,000</div></div>
+          <div class="rent-tag" style="--i:1"><div class="name">Canon 80D + 18-135mm</div><div class="rate">৳1,800 <small class="fw-normal text-soft">/ day</small></div><div class="where">Mirpur, Dhaka · delivery available</div></div>
+          <div class="rent-tag" style="--i:2"><div class="name">JBL PartyBox 310</div><div class="rate">৳2,500 <small class="fw-normal text-soft">/ day</small></div><div class="where">GEC Circle, Chattogram</div></div>
+          <div class="rent-tag" style="--i:3"><div class="name">Shure SM58 mic (pair)</div><div class="rate">৳500 <small class="fw-normal text-soft">/ day</small></div><div class="where">Uttara, Dhaka</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="ticker" aria-hidden="true"><div class="ticker-track">
+  {% for rep in "ab" %}{% for c in categories %}<span>{{ c.name }}</span>{% endfor %}<span>Rent by the day</span><span>Deposit protected</span><span>bKash · Nagad · Rocket</span>{% endfor %}
+</div></div>
+
+<section class="section-tight">
+  <div class="container">
+    <div class="row g-3">
+      {% for c in categories %}
+      <div class="col-6 col-md-4 col-lg-3"><a class="cat-tile" href="{% url 'listings:list' %}?category={{ c.slug }}"><i class="bi {{ c.icon }}"></i><div><div class="fw-bold">{{ c.name }}</div><div class="n">{{ c.n }} item{{ c.n|pluralize }}</div></div></a></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if featured %}
+<section class="section-tight">
+  <div class="container">
+    <h2 class="section-title mb-3">Popular this week</h2>
+    <div class="row g-3">{% for l in featured %}<div class="col-6 col-lg-3">{% include "partials/_listing_card.html" %}</div>{% endfor %}</div>
+  </div>
+</section>
+{% endif %}
+
+<section class="section-tight">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-3"><h2 class="section-title mb-0">Just listed near you</h2><a href="{% url 'listings:list' %}">See all items</a></div>
+    {% if latest %}
+    <div class="row g-3">{% for l in latest %}<div class="col-6 col-lg-3">{% include "partials/_listing_card.html" %}</div>{% endfor %}</div>
+    {% else %}
+    <div class="panel empty"><i class="bi bi-box2"></i><p class="mt-2 mb-3">No items yet. Be the first to list something.</p><a class="btn btn-pine" href="{% url 'listings:create' %}">List an item</a></div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <h2 class="section-title mb-4">Renting takes four steps</h2>
+        <ol class="step-list">
+          <li><b>Find it.</b> Search by item, city and dates. Every listing shows the daily rate and refundable deposit up front.</li>
+          <li><b>Request it.</b> Pick your dates and choose pickup or delivery. The owner confirms.</li>
+          <li><b>Pay BorrowHub.</b> Pay by bKash, Nagad or Rocket. We hold the rent and deposit until the item is back.</li>
+          <li><b>Return it.</b> Your deposit is refunded after the owner checks the item. Then you both review each other.</li>
+        </ol>
+        <a class="btn btn-ghost" href="{% url 'core:how_it_works' %}">Full guide & FAQ</a>
+      </div>
+      <div class="col-lg-6">
+        <div class="panel h-100" style="background:var(--jute-tint);border-color:#ecd48f">
+          <h2 class="section-title">Own a camera, speaker or console?</h2>
+          <p>Items sitting in a cupboard can pay for themselves. You set the price, the deposit and the rules. We handle booking, payment and protection against damage.</p>
+          <ul class="list-unstyled mb-4">
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-pine me-2"></i>Keep your rental income minus a {{ SITE.commission_percent|floatformat:"-1" }}% platform fee</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-pine me-2"></i>Security deposit covers damage</li>
+            <li class="mb-2"><i class="bi bi-check-circle-fill text-pine me-2"></i>Accept or decline every request</li>
+            <li><i class="bi bi-check-circle-fill text-pine me-2"></i>Earnings sent to your bKash, Nagad or bank</li>
+          </ul>
+          <a class="btn btn-pine btn-lg" href="{% url 'listings:create' %}">Start earning</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,7 @@
+Django>=5.1,<6.0
+Pillow>=10.0
+whitenoise>=6.6
+gunicorn>=21.2          # production server (not used by runserver)
+psycopg[binary]>=3.1    # PostgreSQL driver (only needed if DATABASE_URL / DB_NAME is set)
+redis>=5.0              # only needed if REDIS_URL is set
+# sentry-sdk>=2.0       # optional error tracking: set SENTRY_DSN

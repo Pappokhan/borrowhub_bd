@@ -1,0 +1,86 @@
+{% extends "base.html" %}{% block title %}Booking {{ booking.code }} · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div><div class="meta">Booking</div><h1 class="h2 mb-0">{{ booking.code }} {% include "partials/_status.html" with b=booking %}</h1></div>
+    <div class="d-flex gap-2 no-print"><a class="btn btn-ghost" href="{% url 'bookings:invoice' booking.code %}" target="_blank"><i class="bi bi-receipt me-1"></i>Receipt</a></div>
+  </div>
+
+  {% if booking.progress_step >= 0 %}
+  <div class="panel mb-4"><ol class="stepper">{% for n, label in steps %}<li style="--i:{{ n }}" class="{% if n <= booking.progress_step %}done{% endif %}{% if n == booking.progress_step %} now{% endif %}">{{ label }}</li>{% endfor %}</ol></div>
+  {% else %}<div class="alert alert-secondary">This booking was {{ booking.get_status_display|lower }}{% if booking.cancel_reason %}: {{ booking.cancel_reason }}{% endif %}.</div>{% endif %}
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="panel mb-3"><div class="d-flex gap-3">
+        {% with c=booking.listing.cover %}{% if c %}<img src="{{ c.image.url }}" style="width:120px;height:90px;object-fit:cover;border-radius:10px" alt="">{% endif %}{% endwith %}
+        <div><a class="h5 text-decoration-none" href="{{ booking.listing.get_absolute_url }}">{{ booking.listing.title }}</a>
+          <div class="meta"><i class="bi bi-calendar3"></i> {{ booking.start_date|date:"D, d M Y" }} → {{ booking.end_date|date:"D, d M Y" }} ({{ booking.days }} day{{ booking.days|pluralize }})</div>
+          <div class="meta"><i class="bi bi-{% if booking.delivery_method == 'delivery' %}truck{% else %}geo-alt{% endif %}"></i> {{ booking.get_delivery_method_display }}{% if booking.delivery_address %} · {{ booking.delivery_address }}{% endif %}</div></div></div>
+        {% if booking.message %}<div class="mt-3 p-3 rounded" style="background:var(--paper)"><div class="meta">Message from renter</div>{{ booking.message }}</div>{% endif %}
+      </div>
+
+      <div class="panel mb-3"><h2>What happens next</h2>
+        {% if booking.status == 'pending' %}
+          {% if is_owner %}<p>{{ booking.renter.display_name }} wants to rent this item. Accept to reserve the dates and ask them to pay.</p>
+            <div class="d-flex gap-2 flex-wrap"><form method="post" action="{% url 'bookings:action' booking.code 'accept' %}">{% csrf_token %}<button class="btn btn-pine">Accept request</button></form>
+            <form method="post" action="{% url 'bookings:action' booking.code 'reject' %}" class="d-flex gap-2">{% csrf_token %}<input class="form-control" name="reason" placeholder="Reason (optional)"><button class="btn btn-ghost">Decline</button></form></div>
+          {% else %}<p class="mb-2">Waiting for {{ booking.owner.display_name }} to respond. Requests expire after 48 hours.</p>{% endif %}
+        {% elif booking.status == 'accepted' %}
+          {% if is_renter %}
+            {% if pending_payment %}<div class="alert alert-info mb-0">We received your payment (TrxID <b>{{ pending_payment.trx_id }}</b>) and are verifying it. This usually takes under an hour.</div>
+            {% else %}
+            <p>Send <b>৳{{ booking.total_payable|floatformat:"0g" }}</b> to BorrowHub using any method, then enter the transaction ID. Pay within {{ SITE.payment_window_hours }} hours of acceptance.</p>
+            <div class="row g-2 mb-3">{% for method, number in pay_numbers.items %}{% if number %}<div class="col-sm-4"><div class="p-2 border rounded text-center"><div class="meta text-capitalize">{{ method }} · Send money</div><b>{{ number }}</b></div></div>{% endif %}{% endfor %}</div>
+            <form method="post" action="{% url 'bookings:action' booking.code 'pay' %}">{% csrf_token %}<div class="row">{% for field in pay_form %}<div class="col-md-4">{% include "partials/_field.html" %}</div>{% endfor %}</div><button class="btn btn-pine">I've paid — confirm</button></form>
+            {% endif %}
+          {% else %}<p class="mb-0">Accepted. Waiting for {{ booking.renter.display_name }} to pay.</p>{% endif %}
+        {% elif booking.status == 'paid' %}
+          <p>Payment is confirmed and held by BorrowHub. {% if is_owner %}Hand the item over, then mark it below.{% else %}Contact the owner to arrange the {% if booking.delivery_method == 'delivery' %}delivery{% else %}pickup{% endif %}.{% endif %}</p>
+          <div class="p-3 rounded mb-3" style="background:var(--paper)"><b>{% if is_owner %}Renter{% else %}Owner{% endif %} contact:</b> {% if is_owner %}{{ booking.renter.display_name }} · {{ booking.renter.phone|default:"no phone added" }}{% else %}{{ booking.owner.display_name }} · {{ booking.owner.phone|default:"no phone added" }} · {{ booking.listing.area }}, {{ booking.listing.city }}{% endif %}</div>
+          {% if is_owner %}<form method="post" action="{% url 'bookings:action' booking.code 'handover' %}">{% csrf_token %}<button class="btn btn-pine">Mark as handed over</button></form>{% endif %}
+        {% elif booking.status == 'active' %}
+          {% if is_owner %}<p>The item is with {{ booking.renter.display_name }} until {{ booking.end_date|date:"d M" }}. When it comes back, inspect it and record the return.</p>
+            <form method="post" action="{% url 'bookings:action' booking.code 'return' %}">{% csrf_token %}{% for field in inspection_form %}{% include "partials/_field.html" %}{% endfor %}<p class="small text-soft">Deposit held: ৳{{ booking.security_deposit|floatformat:"0g" }}</p><button class="btn btn-pine">Record return</button></form>
+          {% else %}<p class="mb-0">Enjoy the item! Return it to {{ booking.owner.display_name }} by <b>{{ booking.end_date|date:"d M Y" }}</b> so your ৳{{ booking.security_deposit|floatformat:"0g" }} deposit can be refunded.</p>{% endif %}
+        {% elif booking.status == 'returned' %}
+          <p>The owner reported damage of <b>৳{{ booking.deposit_deduction|floatformat:"0g" }}</b>.{% if booking.inspection_note %} Note: “{{ booking.inspection_note }}”{% endif %}</p>
+          {% if is_renter %}<p>You have {{ SITE.inspection_window_hours }} hours to accept or dispute. If you do nothing, it is accepted.</p><form method="post" action="{% url 'bookings:action' booking.code 'accept-inspection' %}">{% csrf_token %}<button class="btn btn-pine">Accept deduction</button></form>{% else %}<p class="mb-0 text-soft">Waiting for the renter to accept or dispute.</p>{% endif %}
+        {% elif booking.status == 'disputed' %}<div class="alert alert-warning mb-0">A dispute is open. BorrowHub staff will review it and settle the deposit.</div>
+        {% elif booking.status == 'completed' %}<p class="mb-0">Rental complete{% if booking.deposit_deduction %} · deposit deduction ৳{{ booking.deposit_deduction|floatformat:"0g" }}{% endif %}. {% if is_renter %}Deposit refund: <b>৳{{ booking.refund_due|floatformat:"0g" }}</b>.{% else %}Your earnings: <b>৳{{ booking.owner_payout|add:booking.deposit_deduction|floatformat:"0g" }}</b>.{% endif %}</p>
+        {% else %}<p class="mb-0 text-soft">No further action needed.</p>{% endif %}
+
+        {% if booking.status == 'pending' or booking.status == 'accepted' or booking.status == 'paid' %}{% if is_owner or is_renter %}
+        <hr><form method="post" action="{% url 'bookings:action' booking.code 'cancel' %}" class="d-flex gap-2 flex-wrap" onsubmit="return confirm('Cancel this booking?')">{% csrf_token %}<input class="form-control" style="max-width:280px" name="reason" placeholder="Reason (optional)"><button class="btn btn-ghost text-danger">Cancel booking</button></form>{% if booking.status == 'paid' %}<div class="small text-soft mt-1">Your payment will be refunded in full.</div>{% endif %}{% endif %}{% endif %}
+      </div>
+
+      {% if dispute_form %}<details class="panel mb-3"><summary class="fw-bold" style="cursor:pointer">Something wrong? Open a dispute</summary>
+        <form class="mt-3" method="post" action="{% url 'bookings:action' booking.code 'dispute' %}">{% csrf_token %}{% for field in dispute_form %}{% include "partials/_field.html" %}{% endfor %}<button class="btn btn-ghost text-danger">Open dispute</button></form></details>{% endif %}
+
+      {% for d in disputes %}<div class="panel mb-3"><h2>Dispute · {{ d.get_reason_display }} <span class="pill {% if d.status == 'resolved' %}ok{% else %}warn{% endif %}">{{ d.get_status_display }}</span></h2><p class="mb-1">{{ d.details }}</p><div class="meta">Opened by {{ d.raised_by.display_name }} on {{ d.created_at|date:"d M Y" }}</div>{% if d.resolution_note %}<div class="mt-2 p-2 rounded" style="background:var(--pine-tint)"><b>Decision:</b> {{ d.resolution_note }}{% if d.final_deduction is not None %} (deposit to owner: ৳{{ d.final_deduction|floatformat:"0g" }}){% endif %}</div>{% endif %}</div>{% endfor %}
+
+      {% if booking.status == 'completed' %}
+      <div class="panel mb-3"><h2>Reviews</h2>
+        {% for r in reviews %}<div class="py-2 border-top"><span class="stars">{% for i in "12345" %}<i class="bi bi-star{% if forloop.counter <= r.rating %}-fill{% endif %}"></i>{% endfor %}</span> <b>{{ r.reviewer.display_name }}</b>{% if r.comment %}<p class="mb-0">{{ r.comment }}</p>{% endif %}</div>{% endfor %}
+        {% if review_form %}<form method="post" action="{% url 'bookings:action' booking.code 'review' %}" class="mt-3">{% csrf_token %}{% for field in review_form %}{% include "partials/_field.html" %}{% endfor %}<button class="btn btn-pine">Post review</button></form>{% elif my_review %}<p class="small text-soft mt-2 mb-0">You've reviewed this booking.</p>{% endif %}</div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+      <div class="panel mb-3"><h2>Payment summary</h2>
+        <div class="price-line"><span>৳{{ booking.daily_rate|floatformat:"0g" }} × {{ booking.days }} day{{ booking.days|pluralize }}</span><span>৳{{ booking.rental_amount|floatformat:"0g" }}</span></div>
+        {% if booking.delivery_fee %}<div class="price-line"><span>Delivery fee</span><span>৳{{ booking.delivery_fee|floatformat:"0g" }}</span></div>{% endif %}
+        <div class="price-line"><span>Refundable deposit</span><span>৳{{ booking.security_deposit|floatformat:"0g" }}</span></div>
+        <div class="price-line total"><span>Total paid by renter</span><span>৳{{ booking.total_payable|floatformat:"0g" }}</span></div>
+        {% if is_owner or user.is_staff %}<hr><div class="price-line"><span>Commission ({{ booking.commission_percent|floatformat:"-1" }}%)</span><span>− ৳{{ booking.commission_amount|floatformat:"0g" }}</span></div><div class="price-line"><b>Your earnings</b><b>৳{{ booking.owner_payout|floatformat:"0g" }}</b></div>{% endif %}
+        <div class="small text-soft mt-2">Deposit: {{ booking.get_deposit_status_display }}{% if booking.deposit_deduction %} · deduction ৳{{ booking.deposit_deduction|floatformat:"0g" }}{% endif %}</div>
+      </div>
+      <div class="panel mb-3"><h2>{% if is_owner %}Renter{% else %}Owner{% endif %}</h2>
+        {% if is_owner %}<a class="fw-bold" href="{% url 'accounts:public_profile' booking.renter.username %}">{{ booking.renter.display_name }}</a> {% if booking.renter.is_verified %}<i class="bi bi-patch-check-fill verified"></i>{% endif %}
+        {% else %}<a class="fw-bold" href="{% url 'accounts:public_profile' booking.owner.username %}">{{ booking.owner.display_name }}</a> {% if booking.owner.is_verified %}<i class="bi bi-patch-check-fill verified"></i>{% endif %}{% endif %}
+      </div>
+      {% if payments %}<div class="panel"><h2>Payment records</h2>{% for p in payments %}<div class="d-flex justify-content-between py-2 border-top small"><div>{{ p.get_kind_display }}<div class="meta">{{ p.get_method_display }}{% if p.trx_id %} · {{ p.trx_id }}{% endif %}</div></div><div class="text-end">৳{{ p.amount|floatformat:"0g" }}<div class="meta">{{ p.get_status_display }}</div></div></div>{% endfor %}</div>{% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

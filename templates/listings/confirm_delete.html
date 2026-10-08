@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Delete listing · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:520px"><div class="panel"><h1 class="h4">Delete “{{ listing.title }}”?</h1>
+<p class="text-soft">{% if listing.bookings.exists %}This listing has booking history, so it will be paused instead of deleted.{% else %}This permanently removes the listing and its photos.{% endif %}</p>
+<form method="post">{% csrf_token %}<button class="btn btn-danger">{% if listing.bookings.exists %}Pause listing{% else %}Delete listing{% endif %}</button> <a class="btn btn-ghost" href="{% url 'listings:mine' %}">Keep it</a></form></div></div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Sign up · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:720px">
+  <div class="panel">
+    <h1 class="h3 mb-1">Create your account</h1><p class="text-soft">One account lets you rent items and list your own.</p>
+    <form method="post">{% csrf_token %}
+      {% include "partials/_form_errors.html" %}
+      <div class="row">
+        {% for field in form %}
+        <div class="{% if field.name in 'username,email,agree_terms,area' or field.name == 'agree_terms' %}col-12{% else %}col-md-6{% endif %}">{% include "partials/_field.html" %}</div>
+        {% endfor %}
+      </div>
+      <button class="btn btn-pine btn-lg w-100">Sign up</button>
+    </form>
+    <p class="text-center mt-3 mb-0 small">Already a member? <a href="{% url 'accounts:login' %}">Log in</a></p>
+  </div>
+</div>
+{% endblock %}

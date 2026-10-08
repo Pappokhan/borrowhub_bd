@@ -1,0 +1,39 @@
+{% extends "base.html" %}{% block title %}Browse items for rent · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight">
+  <div class="row g-4">
+    <aside class="col-lg-3">
+      <form method="get" class="panel">
+        <h2 class="h5 mb-3">Filters</h2>
+        <div class="mb-3"><label class="form-label" for="q">Search</label><input class="form-control" id="q" name="q" value="{{ request.GET.q }}" placeholder="Item, brand…"></div>
+        <div class="mb-3"><label class="form-label" for="cat">Category</label><select class="form-select" id="cat" name="category"><option value="">All categories</option>{% for c in categories %}<option value="{{ c.slug }}" {% if request.GET.category == c.slug %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+        <div class="mb-3"><label class="form-label" for="city">City</label><select class="form-select" id="city" name="city"><option value="">Anywhere</option>{% for v, n in cities %}<option value="{{ v }}" {% if request.GET.city == v %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></div>
+        <div class="row g-2 mb-3"><div class="col-6"><label class="form-label" for="mn">Min ৳/day</label><input class="form-control" id="mn" type="number" min="0" name="min_price" value="{{ request.GET.min_price }}"></div><div class="col-6"><label class="form-label" for="mx">Max ৳/day</label><input class="form-control" id="mx" type="number" min="0" name="max_price" value="{{ request.GET.max_price }}"></div></div>
+        <div class="row g-2 mb-3"><div class="col-6"><label class="form-label" for="st">Available from</label><input class="form-control" id="st" type="date" name="start" value="{{ request.GET.start }}"></div><div class="col-6"><label class="form-label" for="en">to</label><input class="form-control" id="en" type="date" name="end" value="{{ request.GET.end }}"></div></div>
+        <div class="form-check mb-3"><input class="form-check-input" type="checkbox" id="dl" name="delivery" value="1" {% if request.GET.delivery == '1' %}checked{% endif %}><label class="form-check-label" for="dl">Delivery available</label></div>
+        <input type="hidden" name="sort" value="{{ sort }}">
+        <button class="btn btn-pine w-100">Apply filters</button>
+        {% if filters_active %}<a class="btn btn-ghost w-100 mt-2" href="{% url 'listings:list' %}">Clear all</a>{% endif %}
+      </form>
+    </aside>
+    <section class="col-lg-9">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+        <div><h1 class="h3 mb-0">{% if request.GET.q %}Results for “{{ request.GET.q }}”{% else %}Items for rent{% endif %}</h1><div class="text-soft small">{{ total }} item{{ total|pluralize }} found</div></div>
+        <form method="get" class="d-flex align-items-center gap-2">
+          {% for k, v in request.GET.items %}{% if k != 'sort' and k != 'page' %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endif %}{% endfor %}
+          <label for="sort" class="small text-soft mb-0">Sort</label>
+          <select id="sort" name="sort" class="form-select form-select-sm" onchange="this.form.submit()" style="width:auto">
+            <option value="newest" {% if sort == 'newest' %}selected{% endif %}>Newest</option><option value="price_low" {% if sort == 'price_low' %}selected{% endif %}>Price: low to high</option><option value="price_high" {% if sort == 'price_high' %}selected{% endif %}>Price: high to low</option><option value="popular" {% if sort == 'popular' %}selected{% endif %}>Most viewed</option>
+          </select>
+        </form>
+      </div>
+      {% if page.object_list %}
+      <div class="row g-3">{% for l in page.object_list %}<div class="col-6 col-xl-4">{% include "partials/_listing_card.html" %}</div>{% endfor %}</div>
+      {% include "partials/_pagination.html" %}
+      {% else %}
+      <div class="panel empty"><i class="bi bi-search"></i><h2 class="h5 mt-2">No items match these filters</h2><p>Try a different city, widen your price range or remove the dates.</p><a class="btn btn-pine" href="{% url 'listings:list' %}">Clear filters</a></div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}{% block title %}Get verified · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:620px"><div class="panel">
+  <h1 class="h3">Get the Verified badge</h1>
+  <p class="text-soft">Verified members get more bookings. Send your NID number and a clear photo of the front. We only use it to confirm who you are.</p>
+  {% if user.verification_status == 'pending' %}<div class="alert alert-info">Your documents are under review. You can send new ones below.</div>{% elif user.verification_status == 'rejected' %}<div class="alert alert-danger">Your last submission was rejected. Please send a clearer photo.</div>{% endif %}
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}{% include "partials/_form_errors.html" %}{% for field in form %}{% include "partials/_field.html" %}{% endfor %}<button class="btn btn-pine">Submit for review</button></form>
+</div></div>
+{% endblock %}

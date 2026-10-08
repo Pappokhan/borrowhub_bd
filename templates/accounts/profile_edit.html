@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Profile · {{ SITE.site_name }}{% endblock %}
+{% block content %}
+<div class="container section-tight" style="max-width:820px">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2"><h1 class="h2 mb-0">Profile & payouts</h1>
+    <div class="d-flex gap-2"><a class="btn btn-ghost btn-sm" href="{% url 'accounts:password_change' %}">Change password</a><a class="btn btn-ghost btn-sm" href="{% url 'accounts:public_profile' user.username %}">View public profile</a></div></div>
+  <form method="post" enctype="multipart/form-data" class="panel">{% csrf_token %}
+    {% include "partials/_form_errors.html" %}
+    <div class="row">
+      {% for field in form %}<div class="{% if field.name in 'address,bio,avatar' %}col-12{% else %}col-md-6{% endif %}">{% include "partials/_field.html" %}</div>{% endfor %}
+    </div>
+    <p class="small text-soft">Your payout account is where we send your earnings and deposit refunds. Double-check the number.</p>
+    <button class="btn btn-pine">Save profile</button>
+  </form>
+</div>
+{% endblock %}
