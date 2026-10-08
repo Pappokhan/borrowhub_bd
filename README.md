@@ -1,4 +1,4 @@
-# BorrowHub BD — peer-to-peer rental marketplace (Django 5)
+# BorrowHub BD - peer-to-peer rental marketplace (Django 5)
 
 > Kenar dorkar nei, proyojon hole rent nao; ar unused jinish pore na rekhe income koro.
 
